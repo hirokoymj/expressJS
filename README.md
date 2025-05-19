@@ -188,8 +188,101 @@ app.use("/movies", movies);
 - [res.redirect()](https://expressjs.com/en/5x/api.html#res.redirect) - Redirect a request.
 - [res.send()](https://expressjs.com/en/5x/api.html#res.send) - Send a response of various types.
 
+## Authentication with JWT
+
+- [auth.js](./auth.js)
+
+**Register**
+
+```js
+const express = require("express");
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
+
+const app = express();
+app.use(express.json());
+
+const JWT_SECRET = "your-secret-key";
+
+const users = [];
+
+app.get("/", (req, res) => {
+  res.send("Hello World!" + JSON.stringify(users));
+});
+
+app.post("/register", async (req, res) => {
+  try {
+    const { username, password } = req.body;
+
+    const existingUser = users.find((user) => user.username === username);
+    if (existingUser) {
+      return res.status(400).json({ message: "Username already taken" });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newUser = { username, password: hashedPassword };
+    users.push(newUser);
+
+    res.status(201).json({ message: "User created successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+```
+
+![auth-register](./auth-register.png)
+
+<hr />
+
+**Login**
+
+```js
+app.post("/login", async (req, res) => {
+  try {
+    const { username, password } = req.body;
+
+    const user = users.find((user) => user.username === username);
+    if (!user) {
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
+
+    const passwordMatch = await bcrypt.compare(password, user.password);
+    if (!passwordMatch) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+
+    const token = jwt.sign({ username: user.username }, JWT_SECRET, {
+      expiresIn: "1h",
+    });
+
+    res.json({ message: "Logged in successfully", token });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+```
+
+![](./auth-login.png)
+
+<hr />
+
+**Logout**
+
+```js
+app.post("/logout", (req, res) => {
+  // Client-side should remove the token
+  res.json({ message: "Logged out successfully" });
+});
+```
+
+![](./auth-logout.png)
+
 ## References
 
+- [HTTP status codes](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#4xx_client_errors)
 - https://expressjs.com/en/guide/writing-middleware.html
 - https://expressjs.com/en/5x/api.html
 - **Bruno**: https://www.usebruno.com/

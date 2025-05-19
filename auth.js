@@ -5,26 +5,25 @@ const bcrypt = require("bcrypt");
 const app = express();
 app.use(express.json());
 
-// Replace with a secure, randomly generated key in a production environment
 const JWT_SECRET = "your-secret-key";
 
-// Mock user data (replace with database interaction in a real application)
 const users = [];
+
+app.get("/", (req, res) => {
+  res.send("Hello World!" + JSON.stringify(users));
+});
 
 app.post("/register", async (req, res) => {
   try {
     const { username, password } = req.body;
 
-    // Check if user already exists
     const existingUser = users.find((user) => user.username === username);
     if (existingUser) {
       return res.status(400).json({ message: "Username already taken" });
     }
 
-    // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create a new user
     const newUser = { username, password: hashedPassword };
     users.push(newUser);
 
@@ -39,19 +38,16 @@ app.post("/login", async (req, res) => {
   try {
     const { username, password } = req.body;
 
-    // Find the user
     const user = users.find((user) => user.username === username);
     if (!user) {
-      return res.status(401).json({ message: "Invalid credentials" });
+      return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    // Check password
     const passwordMatch = await bcrypt.compare(password, user.password);
     if (!passwordMatch) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    // Create a JWT token
     const token = jwt.sign({ username: user.username }, JWT_SECRET, {
       expiresIn: "1h",
     });
@@ -93,5 +89,5 @@ app.get("/profile", authenticateToken, (req, res) => {
 
 const PORT = 3000;
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+  console.log(`Server is running on port ${PORT} by HIROKO`);
 });

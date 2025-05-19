@@ -4,12 +4,12 @@ meta {
   seq: 2
 }
 
-post {
-  url: http://localhost:3000/movies
+delete {
+  url: http://localhost:3000/movies/101
   body: json
   auth: inherit
 }
 
 body:json {
-  {"id":105,"name":"Toy story","year":"1995","rating":"8.5"}
+  {"year": 2008, "rating": 5 }
 }
