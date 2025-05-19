@@ -192,7 +192,7 @@ app.use("/movies", movies);
 
 - [auth.js](./auth.js)
 
-**Register**
+### Register
 
 ```js
 const express = require("express");
@@ -236,7 +236,7 @@ app.post("/register", async (req, res) => {
 
 <hr />
 
-**Login**
+### Login
 
 ```js
 app.post("/login", async (req, res) => {
@@ -269,7 +269,7 @@ app.post("/login", async (req, res) => {
 
 <hr />
 
-**Logout**
+### Logout
 
 ```js
 app.post("/logout", (req, res) => {
