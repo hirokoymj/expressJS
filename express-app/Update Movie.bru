@@ -1,0 +1,15 @@
+meta {
+  name: Update Movie
+  type: http
+  seq: 3
+}
+
+put {
+  url: http://localhost:3000/movies/101
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {"name":"Paul","year":"2003","rating":"6.9"}
+}
