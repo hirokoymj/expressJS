@@ -112,8 +112,6 @@ app.get("/", (req, res, next) => {
 
 **Example**
 
-// movies.js
-
 ```js
 router.get("/:id", (req, res, next) => {
   const currentMovie = movies.filter((movie) => movie.id == req.params.id);
@@ -151,13 +149,10 @@ const movies = [
   { id: 103, name: "The Dark Knight", year: 2008, rating: 9 },
   { id: 104, name: "12 Angry Men", year: 1957, rating: 8.9 },
 ];
-
-//localhost:3000/movies
 router.get("/", (req, res) => {
   res.json(movies);
 });
 
-//localhost:3000/movies/10
 router.get("/:id", (req, res, next) => {
   const currentMovie = movies.filter((movie) => movie.id == req.params.id);
   res.json(currentMovie[0]);
@@ -177,16 +172,79 @@ app.use("/movies", movies);
 
 <hr />
 
-## REST APIs (GET, POST, PUT, DELETE)
+## REST APIs (GET, POST, PUT and DELETE)
 
-- [movies.js](routes/movies.js)
+```js
+const movies = [
+  { id: 101, name: "Fight Club", year: 1999, rating: 8.1 },
+  { id: 102, name: "Inception", year: 2010, rating: 8.7 },
+  { id: 103, name: "The Dark Knight", year: 2008, rating: 9 },
+];
+router.get("/", (req, res) => {
+  res.status(200).json(movies);
+});
+router.get("/:id", (req, res, next) => {
+  const movie = movies.filter((movie) => movie.id == req.params.id);
+  if (movie.length === 0) {
+    res.status(400).json({ message: "Bad Request" });
+  } else {
+    res.status(200).json(movie[0]);
+  }
+});
+router.post("/", (req, res, next) => {
+  const { name = "", year = 0, rating = 0.0 } = req.body;
+  if (name === "" || year === 0 || rating === 0.0) {
+    res.status(400).json({ message: "Bad Request - all fields are required" });
+  } else {
+    movies.push({
+      id: movies[movies.length - 1].id + 1,
+      name,
+      year,
+      rating,
+    });
+    res
+      .status(201)
+      .json({ message: "New movie created.", location: "/movies/" + newId });
+  }
+});
+router.put("/:id", (req, res, next) => {
+  const { name = "", year = 0, rating = 0.0 } = req.body;
+  if (name === "" || year === 0 || rating === 0.0 || req.params.id === "") {
+    res.status.json({ message: "Bad Request" });
+  } else {
+    const found = movies.find((data) => data.id == req.params.id);
+    if (found) {
+      found.name = name;
+      found.year = year;
+      found.rating = rating;
+      res
+        .status(200)
+        .json({ message: "Movie id " + req.params.id + " updated." });
+    }
+  }
+});
+router.delete("/:id", (req, res, next) => {
+  const removeIndex = movies.findIndex((data) => data.id == req.params.id);
+  if (removeIndex === -1) {
+    res.status(404).json({ message: "Not found the movie" });
+  } else {
+    movies.splice(removeIndex, 1);
+    res.status(204).send({ message: "Movie id " + req.params.id + " removed" });
+  }
+});
+```
+
+- [routes/movies.js](./routes/movies.js)
 
 ## Response methods
 
 - https://expressjs.com/en/guide/routing.html
+
+  > The response object (res) can send a response to the client, and **terminate** the request-response cycle.
+
+- [res.send()](https://expressjs.com/en/5x/api.html#res.send) - Send a response of various types.
 - [res.json()](https://expressjs.com/en/5x/api.html#res.json) - Send a JSON response.
 - [res.redirect()](https://expressjs.com/en/5x/api.html#res.redirect) - Redirect a request.
-- [res.send()](https://expressjs.com/en/5x/api.html#res.send) - Send a response of various types.
 
 ## Authentication with JWT
 
@@ -245,7 +303,7 @@ app.post("/login", async (req, res) => {
 
     const user = users.find((user) => user.username === username);
     if (!user) {
-      return res.status(400).json({ message: "Invalid credentials" });
+      return res.status(401).json({ message: "Invalid credentials" });
     }
 
     const passwordMatch = await bcrypt.compare(password, user.password);

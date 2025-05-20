@@ -4,8 +4,12 @@ meta {
   seq: 7
 }
 
-post {
-  url: localhost:3000/register
-  body: none
+get {
+  url: http://localhost:3000/profile
+  body: json
   auth: inherit
+}
+
+body:json {
+  {"username": "test", "password": "test"}
 }

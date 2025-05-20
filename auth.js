@@ -40,12 +40,14 @@ app.post("/login", async (req, res) => {
 
     const user = users.find((user) => user.username === username);
     if (!user) {
-      return res.status(400).json({ message: "Invalid credentials" });
+      return res
+        .status(401)
+        .json({ message: "Invalid credentials - User does not exist" });
     }
 
     const passwordMatch = await bcrypt.compare(password, user.password);
     if (!passwordMatch) {
-      return res.status(401).json({ message: "Invalid credentials" });
+      return res.status(401).json({ message: "Wrong password" });
     }
 
     const token = jwt.sign({ username: user.username }, JWT_SECRET, {
